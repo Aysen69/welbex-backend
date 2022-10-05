@@ -50,25 +50,35 @@ export default class Product extends Model {
     let sql = ''
     switch (productsRequest.filterCondition) {
       case Condition.Contain:
+        if (!Product._isTextColumn(productsRequest.filterColumn)) break
         sql += ' and ' + productsRequest.filterColumn + '::text like \'%' + productsRequest.filterSearchText + '%\''
         break
       case Condition.Equal:
+        if (!Product._isComparableColumn(productsRequest.filterColumn)) break
         sql += ' and ' + productsRequest.filterColumn + '::text = \'' + productsRequest.filterSearchText + '\''
         break
       case Condition.Less:
-        if (!Product._isNumeric(productsRequest.filterColumn)) break
+        if (!Product._isNumericColumn(productsRequest.filterColumn)) break
         sql += ' and ' + productsRequest.filterColumn + '::integer < ' + Product._parseNumber(productsRequest.filterSearchText)
         break
       case Condition.More:
-        if (!Product._isNumeric(productsRequest.filterColumn)) break
+        if (!Product._isNumericColumn(productsRequest.filterColumn)) break
         sql += ' and ' + productsRequest.filterColumn + '::integer > ' + Product._parseNumber(productsRequest.filterSearchText)
         break
     }
     return sql
   }
 
-  private static _isNumeric(productColumn: ProductColumn) {
+  private static _isNumericColumn(productColumn: ProductColumn) {
     return [ProductColumn.Identity, ProductColumn.Quantity, ProductColumn.Distance].includes(productColumn)
+  }
+
+  private static _isTextColumn(productColumn: ProductColumn) {
+    return [ProductColumn.Date, ProductColumn.Name].includes(productColumn)
+  }
+
+  private static _isComparableColumn(productColumn: ProductColumn) {
+    return [ProductColumn.Identity, ProductColumn.Date, ProductColumn.Name, ProductColumn.Quantity, ProductColumn.Distance].includes(productColumn)
   }
 
   private static _parseNumber(input: any) {
