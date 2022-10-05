@@ -57,11 +57,11 @@ export default class Product extends Model {
         break
       case Condition.Less:
         if (!Product._isNumeric(productsRequest.filterColumn)) break
-        sql += ' and ' + productsRequest.filterColumn + '::integer < ' + Number(productsRequest.filterSearchText)
+        sql += ' and ' + productsRequest.filterColumn + '::integer < ' + Product._parseNumber(productsRequest.filterSearchText)
         break
       case Condition.More:
         if (!Product._isNumeric(productsRequest.filterColumn)) break
-        sql += ' and ' + productsRequest.filterColumn + '::integer > ' + Number(productsRequest.filterSearchText)
+        sql += ' and ' + productsRequest.filterColumn + '::integer > ' + Product._parseNumber(productsRequest.filterSearchText)
         break
     }
     return sql
@@ -69,6 +69,14 @@ export default class Product extends Model {
 
   private static _isNumeric(productColumn: ProductColumn) {
     return [ProductColumn.Identity, ProductColumn.Quantity, ProductColumn.Distance].includes(productColumn)
+  }
+
+  private static _parseNumber(input: any) {
+    if (typeof input !== 'string') return 0
+    if (input === '') return 0
+    const regExpNumMatch = input.match(/\d+/g)
+    const num = regExpNumMatch === null ? 0 : Number(regExpNumMatch[0])
+    return num
   }
 
 }
